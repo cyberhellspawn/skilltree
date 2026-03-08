@@ -242,15 +242,15 @@ document.getElementById("wallet").innerHTML=wallet
 
 let nodes=new vis.DataSet([
 
-{id:1,value:0,level:5,label:"Favor del Patrón",tipo:"Pasiva",descripcion:"Ganas un bono de +1",usos:"—",ap:"—",duracion:"—",rango:"—"},
-{id:2,value:180,level:4,label:"Sandalias de Viento",tipo:"Activa",descripcion:"Gana +10 pies de movimiento",usos:"1/día",ap:"1 AP",duracion:"1 minuto",rango:"Personal"},
-{id:3,value:1200,level:4,label:"Ojo del Céfiro",tipo:"Activa",descripcion:"Gana un bono de +2",usos:"3/día",ap:"2 AP",duracion:"1 minuto",rango:"Personal"},
-{id:4,value:2592,level:3,label:"Brisa Bendita",tipo:"Pasiva",descripcion:"Revela enemigos invisibles",usos:"—",ap:"—",duracion:"—",rango:"—"},
-{id:5,value:2912,level:3,label:"Viento Ascendente",tipo:"Mixta",descripcion:"Recuperas todos tus Hit Points",usos:"1/semana",ap:"8 AP",duracion:"—",rango:"—"},
-{id:6,value:6400,level:3,label:"Magnífica Palabra",tipo:"Activa",descripcion:"Selecciona dos características",usos:"1/hora",ap:"5 AP",duracion:"1 hora",rango:"30 pies"},
-{id:7,value:7200,level:2,label:"Aliento de Morabhan",tipo:"Pasiva",descripcion:"Ganas un bono de +4",usos:"—",ap:"—",duracion:"—",rango:"—"},
-{id:8,value:10800,level:2,label:"Susurros Partidos",tipo:"Pasiva",descripcion:"Comunicación telepática",usos:"—",ap:"—",duracion:"—",rango:"60 pies"},
-{id:9,value:12920,level:1,label:"Morab-Er-Hroek",tipo:"Activa",descripcion:"La criatura objetivo cambia de alineación",usos:"1/año",ap:"10 AP",duracion:"Instantánea",rango:"5 pies"}
+{id:1,value:0,level:5,label:"Favor del Patrón",tipo:"Pasiva",descripcion:"Ganas un bono de +1 (Competencia) en todas las tiradas de Carisma con personal del Circo. Gana un bono de +1 a la CA (Esquiva) por cada dos habilidades de vínculo que adquieras con Alderh aparte de ésta.",usos:"—",ap:"—",duracion:"—",rango:"—"},
+{id:2,value:180,level:4,label:"Sandalias de Viento",tipo:"Activa",descripcion:"Gana +10 pies a todas tus velocidades de movimiento y mejora tu maniobrabilidad de vuelo a la siguiente categoría (de tener una).",usos:"1/día",ap:"1 AP",duracion:"1 minuto",rango:"Personal"},
+{id:3,value:1200,level:4,label:"Ojo del Céfiro",tipo:"Activa",descripcion:"Revela todos los Tableros de Amistad de todos los miembros actuales de los Gaoth que conozcas.",usos:"3/día",ap:"2 AP",duracion:"1 minuto",rango:"Personal"},
+{id:4,value:2592,level:3,label:"Brisa Bendita",tipo:"Pasiva",descripcion:"Gana un bono de +2 a Destreza, +2 al Carisma y resistencia 5 a daño contundente.",usos:"—",ap:"—",duracion:"—",rango:"—"},
+{id:5,value:2912,level:3,label:"Viento Ascendente",tipo:"Mixta",descripcion:"Recuperas todos tus Hit Points. Luego. recuperas acceso a todas tus habilidades y maniobras como si hubieras tomado un descanso largo.",usos:"1/semana",ap:"8 AP",duracion:"—",rango:"—"},
+{id:6,value:6400,level:3,label:"Magnífica Palabra",tipo:"Activa",descripcion:"Ganas un bono de +4 (Mejora) al Carisma.",usos:"1/hora",ap:"5 AP",duracion:"1 hora",rango:"30 pies"},
+{id:7,value:7200,level:2,label:"Aliento de Morabhan",tipo:"Pasiva",descripcion:"Selecciona dos características. La criatura objetivo hace una tirada de Salvación de Voluntad (CD basado en Carisma). Si la falla, cambia de lugar esas dos características hasta que vuelvas a usar ésta habilidad o cuando pase una hora.",usos:"—",ap:"—",duracion:"—",rango:"—"},
+{id:8,value:10800,level:2,label:"Susurros Partidos",tipo:"Pasiva",descripcion:"Ganas la habilidad de comunicarte mediante susurros inaudibles para otros con cualquier criatura que pueda entender un lenguaje que conozcas dentro de 60 pies, aun sin tener línea de visión ni efecto. Necesitas una ruta de viaje hacia la criatura. La criatura puede comunicarse contigo de vuelta. Ganas Ventaja en la primer tirada de Carisma hecha cada día con cada criatura con la que te comuniques de ésta forma, mientras la interacción se haga usando ésta habilidad.",usos:"—",ap:"—",duracion:"—",rango:"60 pies"},
+{id:9,value:12920,level:1,label:"Morab-Er-Hroek",tipo:"Activa",descripcion:"La criatura objetivo cambia de alineación a su diametral opuesto, y luego hace una tirada de Voluntad. Si lo falla, ganas Amistad nivel 1 con el y revelas su Tablero de Amistad.",usos:"1/año",ap:"10 AP",duracion:"Instantánea",rango:"5 pies"}
 
 ].map(n=>{
 if(saved && saved.nodes[n.id]) n.selected=true
@@ -387,3 +387,4 @@ updateGraph()
 </body>
 </html>
 ```
+
