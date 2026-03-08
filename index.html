@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Árbol de habilidades - Halder Gaoth</title>
+
+<script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+
+<style>
+
+body{
+margin:0;
+overflow:hidden;
+font-family:Arial;
+background:black;
+color:white;
+}
+
+/* CAPA DE ESTRELLAS */
+
+#stars{
+position:fixed;
+width:100%;
+height:100%;
+top:0;
+left:0;
+z-index:-2;
+background:black;
+overflow:hidden;
+}
+
+.star{
+position:absolute;
+width:2px;
+height:2px;
+background:white;
+border-radius:50%;
+animation:twinkle 3s infinite ease-in-out;
+}
+
+@keyframes twinkle{
+0%{opacity:.2}
+50%{opacity:1}
+100%{opacity:.2}
+}
+
+/* CAPA IMAGEN CONSTELACIONES */
+
+#constellationOverlay{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background-image:url("constelaciones.png");
+background-size:cover;
+background-position:center;
+opacity:0.15;
+pointer-events:none;
+z-index:-1;
+}
+
+/* ESTRELLAS FUGACES */
+
+.shootingStar{
+position:absolute;
+width:2px;
+height:80px;
+background:linear-gradient(white,transparent);
+opacity:.8;
+transform:rotate(45deg);
+animation:shoot 1s linear forwards;
+}
+
+@keyframes shoot{
+0%{transform:translate(0,0) rotate(45deg);opacity:1}
+100%{transform:translate(-600px,600px) rotate(45deg);opacity:0}
+}
+
+/* UI */
+
+#ui{
+position:absolute;
+top:10px;
+left:10px;
+background:rgba(0,0,0,.45);
+padding:15px;
+border-radius:12px;
+z-index:10;
+}
+
+#wallet{
+color:#ffd700;
+font-weight:bold;
+}
+
+#skilltree{
+width:100vw;
+height:100vh;
+}
+
+/* ventana habilidad */
+
+#skillWindow{
+position:absolute;
+top:150px;
+left:10px;
+background:#111;
+padding:20px;
+border-radius:10px;
+display:none;
+z-index:50;
+width:320px;
+box-shadow:0 0 20px rgba(0,0,0,.7);
+}
+
+#skillWindow h2{
+margin-top:0;
+color:#ffd700;
+}
+
+#skillWindow td{
+padding:6px;
+border-bottom:1px solid #333;
+}
+
+#closeWindow{
+margin-top:10px;
+padding:6px 12px;
+background:#333;
+border:none;
+color:white;
+cursor:pointer;
+border-radius:6px;
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- AUDIO -->
+<audio id="buySound" src="epic.mp3" preload="auto"></audio>
+
+<div id="stars"></div>
+<div id="constellationOverlay"></div>
+
+<div id="ui">
+<h3>Tablero de Amistad - Halder Gaoth</h3>
+Créditos: <span id="wallet"></span><br>
+<button onclick="resetTree()">Reiniciar</button>
+</div>
+
+<div id="skilltree"></div>
+
+<div id="skillWindow">
+
+<h2 id="skillTitle"></h2>
+
+<table>
+<tr><td><b>Costo</b></td><td id="skillValue"></td></tr>
+<tr><td><b>Descripción</b></td><td id="skillDesc"></td></tr>
+<tr><td><b>Tipo</b></td><td id="skillTipo"></td></tr>
+<tr><td><b>AP</b></td><td id="skillAP"></td></tr>
+<tr><td><b>Usos</b></td><td id="skillUsos"></td></tr>
+<tr><td><b>Duración</b></td><td id="skillDur"></td></tr>
+<tr><td><b>Rango</b></td><td id="skillRango"></td></tr>
+</table>
+
+<button id="closeWindow">Cerrar</button>
+
+</div>
+
+<script>
+
+/* GENERAR ESTRELLAS */
+
+function addStars(amount){
+
+const container=document.getElementById("stars")
+
+for(let i=0;i<amount;i++){
+
+let s=document.createElement("div")
+s.className="star"
+
+s.style.top=Math.random()*100+"%"
+s.style.left=Math.random()*100+"%"
+s.style.animationDelay=Math.random()*4+"s"
+
+container.appendChild(s)
+
+}
+
+}
+
+addStars(200)
+
+/* ESTRELLAS FUGACES */
+
+function shootingStar(){
+
+const container=document.getElementById("stars")
+
+let star=document.createElement("div")
+star.className="shootingStar"
+
+star.style.top=Math.random()*40+"%"
+star.style.left=Math.random()*100+"%"
+
+container.appendChild(star)
+
+setTimeout(()=>star.remove(),1000)
+
+}
+
+setInterval(shootingStar,4000)
+
+window.onload=function(){
+initSkillTree()
+}
+
+function initSkillTree(){
+
+const lockedColor="#555"
+const unlockedColor="#ffffff"
+const selectedColor="#00ffd5"
+
+let wallet=115000
+
+let saved=null
+
+try{
+const savedData=localStorage.getItem("skilltree")
+if(savedData)saved=JSON.parse(savedData)
+}catch(e){}
+
+if(saved)wallet=saved.wallet
+
+document.getElementById("wallet").innerHTML=wallet
+
+let nodes=new vis.DataSet([
+
+{id:1,value:0,level:5,label:"Favor del Patrón",tipo:"Pasiva",descripcion:"Ganas un bono de +1",usos:"—",ap:"—",duracion:"—",rango:"—"},
+{id:2,value:180,level:4,label:"Sandalias de Viento",tipo:"Activa",descripcion:"Gana +10 pies de movimiento",usos:"1/día",ap:"1 AP",duracion:"1 minuto",rango:"Personal"},
+{id:3,value:1200,level:4,label:"Ojo del Céfiro",tipo:"Activa",descripcion:"Gana un bono de +2",usos:"3/día",ap:"2 AP",duracion:"1 minuto",rango:"Personal"},
+{id:4,value:2592,level:3,label:"Brisa Bendita",tipo:"Pasiva",descripcion:"Revela enemigos invisibles",usos:"—",ap:"—",duracion:"—",rango:"—"},
+{id:5,value:2912,level:3,label:"Viento Ascendente",tipo:"Mixta",descripcion:"Recuperas todos tus Hit Points",usos:"1/semana",ap:"8 AP",duracion:"—",rango:"—"},
+{id:6,value:6400,level:3,label:"Magnífica Palabra",tipo:"Activa",descripcion:"Selecciona dos características",usos:"1/hora",ap:"5 AP",duracion:"1 hora",rango:"30 pies"},
+{id:7,value:7200,level:2,label:"Aliento de Morabhan",tipo:"Pasiva",descripcion:"Ganas un bono de +4",usos:"—",ap:"—",duracion:"—",rango:"—"},
+{id:8,value:10800,level:2,label:"Susurros Partidos",tipo:"Pasiva",descripcion:"Comunicación telepática",usos:"—",ap:"—",duracion:"—",rango:"60 pies"},
+{id:9,value:12920,level:1,label:"Morab-Er-Hroek",tipo:"Activa",descripcion:"La criatura objetivo cambia de alineación",usos:"1/año",ap:"10 AP",duracion:"Instantánea",rango:"5 pies"}
+
+].map(n=>{
+if(saved && saved.nodes[n.id]) n.selected=true
+return n
+}))
+
+let edges=new vis.DataSet([
+{from:1,to:2},
+{from:1,to:3},
+{from:2,to:4},
+{from:2,to:5},
+{from:3,to:5},
+{from:3,to:6},
+{from:4,to:7},
+{from:5,to:7},
+{from:5,to:8},
+{from:6,to:8},
+{from:7,to:9},
+{from:8,to:9}
+])
+
+const container=document.getElementById("skilltree")
+
+const network=new vis.Network(container,{nodes,edges},{
+nodes:{shape:"star",size:25,font:{size:25,color:"#ffffff"}},
+edges:{color:"#ffd700",width:2,smooth:false},
+layout:{hierarchical:{direction:"UD",levelSeparation:320,nodeSpacing:320}},
+physics:false
+})
+
+function updateGraph(){
+
+nodes.getIds().forEach(id=>{
+
+let node=nodes.get(id)
+let parents=network.getConnectedNodes(id,"from").map(i=>nodes.get(i))
+let unlocked=parents.length===0||parents.some(p=>p.selected)
+
+node.locked=!unlocked||node.value>wallet
+
+node.color={
+background:node.selected?selectedColor:(!node.locked?unlockedColor:lockedColor),
+border:"#fff"
+}
+
+nodes.update(node)
+
+})
+
+saveProgress()
+
+}
+
+/* CLICK INFO */
+
+network.on("click",function(params){
+
+if(!params.nodes.length)return
+
+let node=nodes.get(params.nodes[0])
+
+document.getElementById("skillTitle").innerText=node.label
+document.getElementById("skillValue").innerText=node.value+" XP"
+document.getElementById("skillDesc").innerText=node.descripcion
+document.getElementById("skillTipo").innerText=node.tipo
+document.getElementById("skillAP").innerText=node.ap
+document.getElementById("skillUsos").innerText=node.usos
+document.getElementById("skillDur").innerText=node.duracion
+document.getElementById("skillRango").innerText=node.rango
+
+document.getElementById("skillWindow").style.display="block"
+
+})
+
+/* COMPRA */
+
+network.on("doubleClick",function(params){
+
+if(!params.nodes.length)return
+
+let node=nodes.get(params.nodes[0])
+
+if(node.locked)return
+
+if(!node.selected){
+
+node.selected=true
+wallet-=node.value
+
+document.getElementById("wallet").innerHTML=wallet
+
+nodes.update(node)
+
+addStars(25)
+
+/* SONIDO */
+let sound=document.getElementById("buySound")
+sound.currentTime=0
+sound.play()
+
+}
+
+updateGraph()
+
+})
+
+document.getElementById("closeWindow").onclick=function(){
+document.getElementById("skillWindow").style.display="none"
+}
+
+function saveProgress(){
+
+let data={wallet:wallet,nodes:{}}
+
+nodes.get().forEach(n=>{
+if(n.selected)data.nodes[n.id]=true
+})
+
+localStorage.setItem("skilltree",JSON.stringify(data))
+
+}
+
+window.resetTree=function(){
+localStorage.removeItem("skilltree")
+location.reload()
+}
+
+updateGraph()
+
+}
+
+</script>
+
+</body>
+</html>
+```
